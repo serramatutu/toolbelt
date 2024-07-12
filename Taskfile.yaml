@@ -1,0 +1,18 @@
+version: 3
+
+silent: true
+
+env:
+  # disable jq coloring
+  NO_COLOR: true
+
+includes:
+  kube:
+    taskfile: ./taskfiles/Kube.yaml
+
+tasks:
+  version:
+    desc: current version of tb
+    cmds:
+      - echo "0.1.0"
+

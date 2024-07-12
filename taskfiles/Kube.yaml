@@ -1,0 +1,20 @@
+version: 3
+
+tasks:
+  pod-name:
+    desc: Get the pod name for a given service
+    requires:
+      vars: [SERVICE, NAMESPACE]
+    cmds:
+      - kubectl -n {{.NAMESPACE}} get pods -l app={{.SERVICE}} -o json | jq -r ".items[0].metadata.name"
+
+  shell:
+    desc: Shell into a service pod
+    requires:
+      vars: [SERVICE, NAMESPACE]
+    vars:
+      POD_NAME:
+        sh: task kube:pod-name
+    cmds:
+      - kubectl -n {{.NAMESPACE}} exec {{.POD_NAME}} --tty -it -- /bin/sh
+

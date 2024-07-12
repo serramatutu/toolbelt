@@ -1,0 +1,15 @@
+#!/bin/bash
+
+SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+CURRENT_DIR=$(pwd | rev | cut -d / -f 1 | rev)
+
+services="metricflow-server semantic-layer-gateway"
+
+if [ "$SERVICE" = "" ]; then
+  is_service=$(echo "$services" | grep -w "$CURRENT_DIR")
+  if [ "$is_service" != "" ]; then
+    SERVICE="$CURRENT_DIR"
+  fi
+fi
+
+SERVICE=$SERVICE task -t $SCRIPT_DIR/Taskfile.yaml $@

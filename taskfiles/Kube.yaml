@@ -18,3 +18,14 @@ tasks:
     cmds:
       - kubectl -n {{.NAMESPACE}} exec {{.POD_NAME}} --tty -it -- /bin/sh
 
+  istio-sidecar:stats:
+    aliases: [isstats]
+    desc: Get stats for the istio proxy sidecar
+    requires:
+      vars: [SERVICE, NAMESPACE]
+    vars:
+      POD_NAME:
+        sh: task kube:pod-name
+    cmds:
+      - kubectl -n {{.NAMESPACE}} exec {{.POD_NAME}} -c istio-proxy -- pilot-agent request GET stats
+

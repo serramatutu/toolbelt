@@ -12,10 +12,11 @@ dotenv:
 includes:
   kube:
     taskfile: ./taskfiles/Kube.yaml
+    aliases: [k]
 
 tasks:
   version:
-    desc: current version of tb
+    desc: Current version of tb
     cmds:
       - echo "0.1.0"
 

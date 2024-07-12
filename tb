@@ -1,12 +1,16 @@
 #!/bin/bash
+set -o allexport
 
 SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 CURRENT_DIR=$(pwd | rev | cut -d / -f 1 | rev)
 
-services="metricflow-server semantic-layer-gateway"
+ENV_FILE="$SCRIPT_DIR/.env"
+if [ -f $ENV_FILE ]; then
+  source $ENV_FILE
+fi
 
 if [ "$SERVICE" = "" ]; then
-  is_service=$(echo "$services" | grep -w "$CURRENT_DIR")
+  is_service=$(echo "$KNOWN_SERVICES" | grep -w "$CURRENT_DIR")
   if [ "$is_service" != "" ]; then
     SERVICE="$CURRENT_DIR"
   fi

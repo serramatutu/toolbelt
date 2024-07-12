@@ -6,6 +6,9 @@ env:
   # disable jq coloring
   NO_COLOR: true
 
+dotenv: 
+  - .env
+
 includes:
   kube:
     taskfile: ./taskfiles/Kube.yaml

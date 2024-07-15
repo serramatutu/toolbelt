@@ -1,31 +1,61 @@
 version: 3
 
+vars:
+  KUBE: kubectl -n {{.NAMESPACE}} -l app={{.SERVICE}}
+
 tasks:
+  default:
+    desc: Run any kube command for the service/namespace pair
+    requires:
+      vars: [SERVICE, NAMESPACE]
+    cmds:
+      - '{{.KUBE}} {{.CLI_ARGS}}'
+
   pod-name:
     desc: Get the pod name for a given service
     requires:
       vars: [SERVICE, NAMESPACE]
     cmds:
-      - kubectl -n {{.NAMESPACE}} get pods -l app={{.SERVICE}} -o json | jq -r ".items[0].metadata.name"
+      - '{{.KUBE}} get pods -o jsonpath="{.items[0].metadata.name}"'
+
+  show-*:
+    desc: Get the applied YAML description of a given resource
+    requires:
+      vars: [SERVICE, NAMESPACE]
+    vars:
+      TARGET: '{{index .MATCH 0}}'
+    cmds:
+      - '{{.KUBE}} get {{.TARGET}} -o yaml | bat -l yaml --style plain'
+
+  exec:
+    desc: Execute a commend in a service pod
+    requires:
+      vars: [NAMESPACE]
+    vars:
+      POD:
+        sh: if [ -z "{{.POD}}" ]; then task kube:pod-name; else echo {{.POD}}; fi
+      CONTAINER_STR: '{{if .CONTAINER}}-c {{.CONTAINER}}{{end}}'
+    cmds:
+      - kubectl -n {{.NAMESPACE}} exec {{.POD}} {{.CONTAINER_STR}} -it -- {{.CLI_ARGS}}
 
   shell:
     desc: Shell into a service pod
     requires:
-      vars: [SERVICE, NAMESPACE]
+      vars: [NAMESPACE]
     vars:
-      POD_NAME:
-        sh: task kube:pod-name
+      POD:
+        sh: if [ -z "{{.POD}}" ]; then task kube:pod-name; else echo {{.POD}}; fi
+      CONTAINER_STR: '{{if .CONTAINER}}-c {{.CONTAINER}}{{end}}'
     cmds:
-      - kubectl -n {{.NAMESPACE}} exec {{.POD_NAME}} --tty -it -- /bin/sh
+      - kubectl -n {{.NAMESPACE}} exec {{.POD}} {{.CONTAINER_STR}} --tty -it -- /bin/sh
 
   istio-sidecar:stats:
-    aliases: [isstats]
     desc: Get stats for the istio proxy sidecar
     requires:
-      vars: [SERVICE, NAMESPACE]
+      vars: [NAMESPACE]
     vars:
-      POD_NAME:
-        sh: task kube:pod-name
+      POD:
+        sh: if [ -z "{{.POD}}" ]; then task kube:pod-name; else echo {{.POD}}; fi
     cmds:
-      - kubectl -n {{.NAMESPACE}} exec {{.POD_NAME}} -c istio-proxy -- pilot-agent request GET stats
+      - kubectl -n {{.NAMESPACE}} exec {{.POD}} -c istio-proxy -- pilot-agent request GET stats
 

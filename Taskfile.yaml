@@ -2,17 +2,14 @@ version: 3
 
 silent: true
 
-env:
-  # disable jq coloring
-  NO_COLOR: true
-
 dotenv: 
   - .env
 
 includes:
   kube:
     taskfile: ./taskfiles/Kube.yaml
-    aliases: [k]
+  helm:
+    taskfile: ./taskfiles/Helm.yaml
 
 tasks:
   version:

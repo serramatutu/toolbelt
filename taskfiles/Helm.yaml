@@ -1,0 +1,26 @@
+version: 3
+
+tasks:
+  render-*:
+    desc: Render a template from local helm charts
+    requires:
+      vars: [SERVICE, NAMESPACE]
+    vars:
+      TEMPLATE_FILE: '{{index .MATCH 0}}'
+      CHART: '{{.USER_WORKING_DIR}}/charts/{{.SERVICE}}'
+    cmds:
+      - helm template -s templates/{{.TEMPLATE_FILE}}.yaml {{.SERVICE}} {{.CHART}} --namespace {{.NAMESPACE}} --set namespace={{.NAMESPACE}} | tail -n +3
+
+  apply-*:
+    desc: Apply a locally rendered chart to the cluster
+    requires:
+      vars: [SERVICE, NAMESPACE]
+    vars:
+      TEMPLATE_FILE: '{{index .MATCH 0}}'
+      TMP: /tmp/helm-render.yaml
+    cmds:
+      - task helm:render-{{.TEMPLATE_FILE}} > {{.TMP}}
+      - kubectl apply -f {{.TMP}}
+      - rm {{.TMP}}
+
+

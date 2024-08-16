@@ -17,3 +17,13 @@ tasks:
     cmds:
       - echo "0.1.0"
 
+  debug:
+    desc: Show all available variables
+    cmds:
+      - for: 
+          - NAMESPACE
+          - SERVICE
+        cmd: echo "{{ .ITEM }}=${{ .ITEM }}"
+
+
+

@@ -2,18 +2,10 @@
 set -o allexport
 
 SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
-CURRENT_DIR=$(pwd | rev | cut -d / -f 1 | rev)
+TB_FILE="$(pwd)/.tb"
 
-ENV_FILE="$SCRIPT_DIR/.env"
-if [ -f $ENV_FILE ]; then
-  source $ENV_FILE
+if [ -f "$TB_FILE" ]; then
+  source $TB_FILE
 fi
 
-if [ "$SERVICE" = "" ]; then
-  is_service=$(echo "$KNOWN_SERVICES" | grep -w "$CURRENT_DIR")
-  if [ "$is_service" != "" ]; then
-    SERVICE="$CURRENT_DIR"
-  fi
-fi
-
-SERVICE=$SERVICE task -t $SCRIPT_DIR/Taskfile.yaml $@
+task -t $SCRIPT_DIR/Taskfile.yaml $@
